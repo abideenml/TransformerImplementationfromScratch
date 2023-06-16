@@ -73,3 +73,26 @@ class Transformer(nn.Module):
 
         return trg_log_probs  # the reason I use log here is that PyTorch's nn.KLDivLoss expects log probabilities
 
+class Encoder(nn.Module):
+
+    def __init__(self, encoder_layer, number_of_layers):
+        super().__init__()
+        assert isinstance(encoder_layer, EncoderLayer), f'Expected EncoderLayer got {type(encoder_layer)}.'
+
+        self.encoder_layers = get_clones(encoder_layer, number_of_layers)
+        self.norm = nn.LayerNorm(encoder_layer.model_dimension)
+
+    def forward(self, src_embeddings_batch, src_mask):
+        # Just update the naming so as to reflect the semantics of what this var will become (the initial encoder layer
+        # has embedding vectors as input but later layers have richer token representations)
+        src_representations_batch = src_embeddings_batch
+
+        # Forward pass through the encoder stack
+        for encoder_layer in self.encoder_layers:
+            # src_mask's role is to mask/ignore padded token representations in the multi-headed self-attention module
+            src_representations_batch = encoder_layer(src_representations_batch, src_mask)
+
+        # Not mentioned explicitly in the paper (a consequence of using LayerNorm before instead of after the sublayer
+        # check out the SublayerLogic module)
+        return self.norm(src_representations_batch)
+
