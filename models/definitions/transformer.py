@@ -21,7 +21,7 @@ class Transformer(nn.Module):
         # Adds positional information to source/target token's embedding vector
         # (otherwise we'd lose the positional information which is important in human languages)
         self.src_pos_embedding = PositionalEncoding(model_dimension, dropout_probability)
-        self.trg_pos_embedding = PositionalEncoding(model_dimension, dropout_probability)
+        self.trg_pos_embedding = PositionalEncoding(model_dimension, dropout_probability) 
 
         # All of these will get deep-copied multiple times internally
         mha = MultiHeadedAttention(model_dimension, number_of_heads, dropout_probability, log_attention_weights)
