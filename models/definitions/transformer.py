@@ -4,7 +4,8 @@ import numpy as np
 import tensorflow_datasets as tfds
 import tensorflow as tf
 import tensorflow_text
-
+from utils.constants import *
+from utils.dataset import *
 
 def positional_encoding(length, depth):
   depth = depth/2
@@ -251,3 +252,28 @@ class Transformer(tf.keras.Model):
 
     # Return the final output and the attention weights.
     return logits
+  
+
+# Testing the correctness of the transformer model - feel free to ignore - I used it during model development
+if __name__ == "__main__":
+    for (pt, en), en_labels in train_batches.take(1):
+        break
+    embed_pt = PositionalEmbedding(vocab_size=tokenizers.pt.get_vocab_size(), d_model=512)
+    embed_en = PositionalEmbedding(vocab_size=tokenizers.en.get_vocab_size(), d_model=512)
+
+    pt_emb = embed_pt(pt)
+    en_emb = embed_en(en)
+    
+    transformer = Transformer(
+    num_layers=NUM_LAYERS,
+    d_model=MODEL_DIMENSION,
+    num_heads=NUMBER_OF_HEADS,
+    dff=DFF,
+    input_vocab_size=tokenizers.pt.get_vocab_size().numpy(),
+    target_vocab_size=tokenizers.en.get_vocab_size().numpy(),
+    dropout_rate=DROPOUT_PROB)
+
+    output = transformer((pt, en))
+    print(en.shape)
+    print(pt.shape)
+    print(output.shape)
