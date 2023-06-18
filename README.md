@@ -1,1 +1,1 @@
-# Pytorch Implementation of Vaswani's Transformer
+# Tensorflow implementation of Vaswani's Transformer
