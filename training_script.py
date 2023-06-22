@@ -4,6 +4,8 @@ from utils.constants import *
 from utils.optimizer import *
 from utils.loss_metrics import *
 import argparse
+from translation_script import *
+from utils.export import *
 
 
 def train_transformer(training_config):
@@ -29,6 +31,9 @@ def train_transformer(training_config):
     transformer.fit(train_batches,
                     epochs=training_config['num_of_epochs'],
                     validation_data=val_batches)
+    translator = Translator(tokenizers, transformer)
+    translator = ExportTranslator(translator)
+    tf.saved_model.save(translator, export_dir='translator')
 
 
 if __name__ == "__main__":
@@ -59,3 +64,4 @@ if __name__ == "__main__":
 
     # Train the original transformer model
     train_transformer(training_config)
+    
