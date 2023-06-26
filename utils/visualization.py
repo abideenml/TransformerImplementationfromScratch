@@ -21,22 +21,7 @@ def plot_attention_head(in_tokens, translated_tokens, attention):
   ax.set_yticklabels(labels)
 
 
-def plot_attention_weights(sentence, translated_tokens, attention_heads):
-  in_tokens = tf.convert_to_tensor([sentence])
-  in_tokens = tokenizers.pt.tokenize(in_tokens).to_tensor()
-  in_tokens = tokenizers.pt.lookup(in_tokens)[0]
 
-  fig = plt.figure(figsize=(16, 8))
-
-  for h, head in enumerate(attention_heads):
-    ax = fig.add_subplot(2, 4, h+1)
-
-    plot_attention_head(in_tokens, translated_tokens, head)
-
-    ax.set_xlabel(f'Head {h+1}')
-
-  plt.tight_layout()
-  plt.show()
 
 
 def plot_graphs(translation_config):
