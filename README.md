@@ -39,10 +39,6 @@ Here is how their beautifully simple architecture looks like:
 <img src="data/readme_pics/lr_formula.PNG"/>
 </p>
 
-<p align="center">
-<img src="data/readme_pics/custom_learning_rate_schedule.PNG"/>
-</p>
-
 ### Label Smoothing
 
 <p align="center">
