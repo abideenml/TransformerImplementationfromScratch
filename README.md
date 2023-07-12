@@ -123,18 +123,7 @@ Current results, models were trained for 20 epochs (DE stands for Deutch i.e. Ge
 | Baseline transformer (EN-DE) | x | WMT-14 val |
 | Baseline transformer (DE-EN) | x | WMT-14 val |
 
-I got these using greedy decoding so it's a pessimistic estimate, I'll add beam decoding [soon.](#todos)
 
-**Important note:** Initialization matters a lot for the transformer! I initially thought that other implementations
-using Xavier initialization is again one of those arbitrary heuristics and that PyTorch default init will do - I was wrong:
-
-<p align="center">
-<img src="data/readme_pics/bleu_score_xavier_vs_default_pt_init.PNG" width="450"/>
-</p>
-
-You can see here 3 runs, the 2 lower ones used PyTorch default initialization (one used `mean` for KL divergence
-loss and the better one used `batchmean`), whereas the upper one used **Xavier uniform** initialization!
- 
 ---
 
 ### Visualizing attention
@@ -173,6 +162,3 @@ I found these resources useful (while developing this one):
 * Follow me on [LinkedIn](https://www.linkedin.com/in/zaiinulabideen/)
 * Follow me on [Medium](https://medium.com/@zaiinn440) :books: :heart:
 
-## Licence
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/gordicaleksa/pytorch-original-transformer/blob/master/LICENCE)
