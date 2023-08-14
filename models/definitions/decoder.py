@@ -19,6 +19,8 @@ class DecoderLayer(tf.keras.layers.Layer):
         key_dim=d_model,
         dropout=dropout_rate)
 
+                 
+
     self.cross_attention = CrossAttention(
         num_heads=num_heads,
         key_dim=d_model,
