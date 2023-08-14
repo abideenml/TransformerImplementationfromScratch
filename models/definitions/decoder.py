@@ -37,6 +37,8 @@ class DecoderLayer(tf.keras.layers.Layer):
 
     x = self.ffn(x)  # Shape `(batch_size, seq_len, d_model)`.
     return x
+
+
   
 class Decoder(tf.keras.layers.Layer):
   def __init__(self, *, num_layers, d_model, num_heads, dff, vocab_size,
