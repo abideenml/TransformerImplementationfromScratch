@@ -6,8 +6,6 @@ from utils.loss_metrics import *
 import argparse
 from translation_script import *
 from utils.export import *
-
-
 def train_transformer(training_config):
     transformer = Transformer(
         num_layers=NUM_LAYERS,
