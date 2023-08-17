@@ -1,9 +1,12 @@
 import tensorflow as tf
 from utils.constants import *
 class ExportTranslator(tf.Module):
+  
   def __init__(self, translator):
     self.translator = translator
 
+
+  
   @tf.function(input_signature=[tf.TensorSpec(shape=[], dtype=tf.string)])
   def __call__(self, sentence):
     (result,
