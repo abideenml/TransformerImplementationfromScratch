@@ -1,10 +1,15 @@
 ## The Original Transformer (Tensorflow)
 This repo contains Tensorflow implementation of the original transformer paper (:link: [Vaswani et al.](https://arxiv.org/abs/1706.03762)). <br/>
 Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zaiinn440))
+
 ## Table of Contents
   * [What are transformers?](#what-are-transformers)
   * [Machine translation](#machine-translation)
   * [Setup](#setup)
+  * [Todos](#todos)
+  * [Acknowledgements](#acknowledgements)
+  * [Citation](#citation)
+  * [Connect with me](#connect-with-me)
 
 ## What are transformers
 
@@ -56,15 +61,15 @@ Transformer was originally trained for the NMT (neural machine translation) task
 
 ## Setup
 
-So we talked about what transformers are, and what they can do for you (among other things). <br/>
+
 Let's get this thing running! Follow the next steps:
 
 1. `git clone https://github.com/abideenml/TransformerImplementationfromScratch`
-2. Open Anaconda console and navigate into project directory `cd path_to_repo`
-3. Run `conda env create` from project directory (this will create a brand new conda environment).
-4. Run `activate transformer` (for running scripts from your console or set the interpreter in your IDE)
+2. Navigate into project directory `cd path_to_repo`
+3. Create a new venv environment and run `pip install -r requirements.txt`
+4. 
 
-That's it! It should work out-of-the-box executing environment.yml file which deals with dependencies. <br/
+That's it!<br/
 
 -----
 
@@ -149,16 +154,50 @@ You can notice an interesting **triangular pattern** which comes from the fact t
 The 3rd type of MHA module is the source attending one and it looks similar to the plot you saw for the encoder. <br/>
 
 
+## Todos:
+
+Finally there are a couple more todos which I'll hopefully add really soon:
+* Explore how open source LLMs can be used to detect these scams.
+* Make a data pipeline with Kedro and MLflow.
+* Deploy the models and learn the effect of drift on their performance.
+
+
 ## Acknowledgements
 
 I found these resources useful (while developing this one):
 
 * [The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
 * [PyTorch official implementation](https://github.com/pytorch/pytorch/blob/187e23397c075ec2f6e89ea75d24371e3fbf9efa/torch/nn/modules/transformer.py)
+* [Jay Alammar's Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/)
+* [Deep Learning Systems](https://www.youtube.com/watch?v=OzFmKdAHJn0&ab_channel=DeepLearningSystemsCourse)
 
+
+
+
+## Citation
+
+If you find this code useful, please cite the following:
+
+```
+@misc{Zain2023TransformerImplementation,
+  author = {Zain, Abideen},
+  title = {transformer-implementation-from-scratch},
+  year = {2023},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/abideenml/TransformerImplementationfromScratch}},
+}
+```
 
 ## Connect with me
 
-* Follow me on [LinkedIn](https://www.linkedin.com/in/zaiinulabideen/)
-* Follow me on [Medium](https://medium.com/@zaiinn440) :books: :heart:
+If you'd love to have some more AI-related content in your life :nerd_face:, consider:
+
+* Connect and reach me on [LinkedIn](https://www.linkedin.com/in/zaiinulabideen/) and [Twitter](https://twitter.com/zaynismm)
+* Follow me on 📚 [Medium](https://medium.com/@zaiinn440)
+* Subscribe to my 📢 weekly [AI newsletter](https://rethinkai.substack.com/)!
+
+## Licence
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/abideenml/TransformerImplementationfromScratch/blob/master/LICENCE)
 

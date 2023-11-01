@@ -1,0 +1,6 @@
+tensorflow
+tensorflow_datasets
+tensorflow-text
+protobuf
+numpy
+matplotlib
