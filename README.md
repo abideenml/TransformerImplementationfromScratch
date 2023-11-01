@@ -4,7 +4,11 @@ Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zai
 
 ## Table of Contents
   * [What are transformers?](#what-are-transformers)
+  * [Positional Encodings](#positional-encodings)
+  * [Custom Learning Rate Schedule](#custom-learning-rate-schedule)
+  * [Greedy and Beam Search Decoding](#greedy-and-beam-search-decoding)
   * [Machine translation](#machine-translation)
+  * [Evaluation](#evaluation)
   * [Setup](#setup)
   * [Todos](#todos)
   * [Acknowledgements](#acknowledgements)
@@ -13,20 +17,21 @@ Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zai
 
 ## What are transformers
 
-Transformers were originally proposed by Vaswani et al. in a seminal paper called [Attention Is All You Need](https://arxiv.org/pdf/1706.03762.pdf).
+In 2017, Vaswani et al. published a paper titled [Attention Is All You Need](https://arxiv.org/pdf/1706.03762.pdf) for the NeurIPS conference. They introduced the original transformer architecture for machine translation, performing better and faster than RNN encoder-decoder models, which were mainstream.
 
-You probably heard of transformers one way or another. **GPT-3 and BERT** to name a few well known ones :unicorn:. The main idea
-is that they showed that you don't have to use recurrent or convolutional layers and that simple architecture coupled with attention is super powerful. It
-gave the benefit of **much better long-range dependency modeling** and the architecture itself is highly **parallelizable** which leads to better compute efficiency!
+The transformer architecture is the basis for recent well-known models like BERT and GPT-3. Researchers have already applied the transformer architecture in Computer Vision and Reinforcement Learning. So, understanding the transformer architecture is crucial if anybody wants to know where machine learning is heading.
 
-Here is how their beautifully simple architecture looks like:
+Transformer architecture:
 
 <p align="center">
 <img src="data/readme_pics/transformer_architecture.PNG" width="350"/>
 </p>
 
+The main idea is that they showed that you don't have to use recurrent or convolutional layers and that simple architecture coupled with attention is super powerful. It gave the benefit of **much better long-range dependency modeling** and the architecture itself is highly **parallelizable** which leads to better compute efficiency!
 
-### Positional Encodings
+
+
+## Positional Encodings
 
  Positional encodings are a crucial component in the Transformer architecture, specifically in the context of natural language processing tasks like machine translation. Since the Transformer model lacks any inherent notion of sequence order, it is unable to differentiate between words solely based on their positions in the input sequence. This limitation could be detrimental to its performance in tasks where word order is significant. To address this issue, the authors propose using positional encodings. Positional encodings are vectors added to the embeddings of each word, providing the model with information about their positions in the input sequence. By incorporating these positional encodings, the Transformer can distinguish between words based on both their inherent semantic content and their positions, allowing it to capture the sequential relationships crucial for understanding natural language.
 
@@ -61,18 +66,18 @@ plt.show()
 </p>
 
 
-### Custom Learning Rate Schedule
+## Custom Learning Rate Schedule
 
 In the context of learning rate scheduling in the "Attention is All You Need" paper, two key observations are made. First, it's noted that as the number of embedding vector dimensions increases, the learning rate decreases. This reduction in the learning rate aligns with the intuition that a lower learning rate is necessary when adjusting a larger number of model parameters.
 
 
-<p align="left">
+<p align="center">
 <img src="data/readme_pics/lr_formula.PNG"/>
 </p>
 
 The second observation focuses on how the learning rate changes concerning the training step number (step_num) and the warmup steps (warmup_steps). It's observed that the learning rate follows a specific pattern: it linearly increases until reaching the warmup steps, after which it decreases due to the inverse square root of the step number. This dynamic behavior results in a learning rate that is lower when the number of embedding vector dimensions (dim_embed) is larger. The paper doesn't explicitly explain the reason behind this learning rate schedule, but it is suggested that the warmup period with a small initial learning rate helps stabilize training, and an empirical choice of warmup_steps=4000 is mentioned for the base transformer training.
 
-<p align="left">
+<p align="center">
 <img src="data/readme_pics/learning-rate-schedule.png"/>
 </p>
 
@@ -108,6 +113,12 @@ def calc_lr(step, dim_embed, warmup_steps):
 ## Greedy and Beam Search Decoding
 
 Greedy decoding is a method used in machine translation, particularly in the context of neural machine translation. In this process, the decoder generates a sequence of output words based on the highest probability at each step. It begins with the first word, selected as the one with the maximum probability from the list of possible output words. This chosen word becomes the input for the next step, and the process continues iteratively. The idea is to construct a translation by making locally optimal choices at each stage, selecting the most likely word to proceed.
+
+<p align="center">
+<img src="data/readme_pics/greedy-decoding.png"/>
+</p>
+
+Code for greedy decoding looks something like this:
 
 ```python
 
@@ -168,6 +179,12 @@ However, the limitation of greedy decoding is that it may not always yield the b
 Beam search decoding is a strategy to improve upon the limitations of both greedy and exhaustive search methods. It introduces a hyper-parameter, often denoted as β, which determines the number of paths or beams to retain while conducting the search. With a relatively small value of β, such as 2, the beam search will keep only the top two most probable sequences at each step.
 
 In beam search, as you progress through decoding, you retain a limited set of the most promising sequences, preventing the exponential growth of possibilities and addressing the dimensionality problem associated with exhaustive searches. This allows the search to strike a balance between the simplicity of the greedy approach (where β equals 1) and the thoroughness of an exhaustive search (where β is not limited). By controlling the value of β, you can fine-tune the trade-off between exploration and exploitation in the decoding process, ultimately leading to improved translation quality for machine translation tasks.
+
+<p align="center">
+<img src="data/readme_pics/beam-search.png"/>
+</p>
+
+Code for beam search decoding looks something like this:
 
 ```python
 
@@ -254,11 +271,38 @@ output_text_tokens = [target_vocab.tokens[i] for i in decoder_output if i != EOS
 ## Machine translation
 
 Transformer was originally trained for the NMT (neural machine translation) task on the [WMT-14 dataset](https://torchtext.readthedocs.io/en/latest/datasets.html#wmt14) for:
-* English to German translation task (achieved 28.4 [BLEU score](https://en.wikipedia.org/wiki/BLEU))
+* English to German translation task (achieved 28.4 BLEU score)
 * English to French translation task (achieved 41.8 BLEU score)
  
 
 ---
+
+## Evaluation
+
+Evaluation metrics for machine translation are used to assess the quality and performance of machine translation systems. Some of the commonly used metrics include BLEU (Bilingual Evaluation Understudy), METEOR (Metric for Evaluation of Translation with Explicit ORdering), ROUGE (Recall-Oriented Understudy for Gisting Evaluation), and many more.
+
+Details of BLEU score are:
+
+```python
+
+outputs = []
+targets = []
+
+for source_text, target_text in tqdm(test_dataset):
+    output = translator(source_text)
+    outputs.append(output)
+
+    target = [target_vocab.tokenize(target_text)]
+    targets.append(target)
+
+score = bleu_score(outputs, targets)
+```
+
+ BLEU is one of the most widely used metrics. It measures the similarity between the machine-generated translation and one or more human reference translations. It calculates precision, which evaluates the number of overlapping n-grams (contiguous sequences of n items) between the machine translation and reference translations.
+
+<p align="center">
+<img src="data/readme_pics/bleu-score.webp"/>
+</p>
 
 ## Setup
 
@@ -270,7 +314,7 @@ Let's get this thing running! Follow the next steps:
 3. Create a new venv environment and run `pip install -r requirements.txt`
 4. 
 
-That's it!<br/
+That's it!<br/>
 
 -----
 
@@ -310,27 +354,6 @@ the `--model_name` parameter if you want to play with it for translation purpose
 models they'll **automatically get downloaded** the first time you run the translation script.
 
 
-### Evaluating NMT models
-
-I tracked 3 curves while training:
-* training loss (KL divergence, batchmean)
-* validation loss (KL divergence, batchmean)
-* BLEU-4 
-
-[BLEU is an n-gram based metric](https://www.aclweb.org/anthology/P02-1040.pdf) for quantitatively evaluating the quality of machine translation models. <br/>
-I used the BLEU-4 metric provided by the awesome **nltk** Python module.
-
-Current results, models were trained for 20 epochs (DE stands for Deutch i.e. German in German :nerd_face:):
-
-| Model | BLEU score | Dataset |
-| --- | --- | --- |
-| [Baseline transformer (EN-DE)](https://www.dropbox.com/s/a6pfo6t9m2dh1jq/iwslt_e2g.pth?dl=1) | **27.8** | IWSLT val |
-| [Baseline transformer (DE-EN)](https://www.dropbox.com/s/dgcd4xhwig7ygqd/iwslt_g2e.pth?dl=1) | **33.2** | IWSLT val |
-| Baseline transformer (EN-DE) | x | WMT-14 val |
-| Baseline transformer (DE-EN) | x | WMT-14 val |
-
-
----
 
 ### Visualizing attention
 
