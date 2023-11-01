@@ -6,7 +6,16 @@ from utils.loss_metrics import *
 import argparse
 from translation_script import *
 from utils.export import *
+
+
 def train_transformer(training_config):
+    """
+    Train the transformer model
+    :param training_config: dictionary containing training configuration
+    :return: None
+    
+    """
+
     transformer = Transformer(
         num_layers=NUM_LAYERS,
         d_model=MODEL_DIMENSION,

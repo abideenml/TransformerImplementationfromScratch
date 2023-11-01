@@ -61,6 +61,7 @@ class Translator(tf.Module):
   
 
 def print_translation(sentence, tokens):
+  
   print(f'{"Input:":15s}: {sentence}')
   print(f'{"Prediction":15s}: {tokens.numpy().decode("utf-8")}')
 

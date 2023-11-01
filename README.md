@@ -28,9 +28,33 @@ Here is how their beautifully simple architecture looks like:
 
 ### Positional Encodings
 
-<p align="left">
+ Positional encodings are a crucial component in the Transformer architecture, specifically in the context of natural language processing tasks like machine translation. Since the Transformer model lacks any inherent notion of sequence order, it is unable to differentiate between words solely based on their positions in the input sequence. This limitation could be detrimental to its performance in tasks where word order is significant. To address this issue, the authors propose using positional encodings. Positional encodings are vectors added to the embeddings of each word, providing the model with information about their positions in the input sequence. By incorporating these positional encodings, the Transformer can distinguish between words based on both their inherent semantic content and their positions, allowing it to capture the sequential relationships crucial for understanding natural language.
+
+<p align="center">
 <img src="data/readme_pics/positional_encoding_formula.PNG"/>
 </p>
+
+Positional encodings are typically calculated using trigonometric functions such as sine and cosine to create distinct and learnable encodings for different positions in the sequence. These encodings are then added to the word embeddings before being fed into the Transformer model.
+
+```python
+
+import matplotlib.pyplot as plt
+
+pos = np.arange(MAX_SEQ_LEN)[:, np.newaxis]
+div_term = np.exp(np.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+
+PE[:, 0::2] = np.sin(pos * div_term)
+PE[:, 1::2] = np.cos(pos * div_term)
+
+im = plt.imshow(PE, aspect=’auto’)
+
+plt.title(“Positional Encoding”)
+plt.xlabel(“Encoding Dimension”)
+plt.ylabel(“Position Index”)
+plt.colorbar(im)
+plt.show()
+
+```
 
 <p align="center">
 <img src="data/readme_pics/positional_encoding_visualized.jpg"/>
@@ -39,16 +63,193 @@ Here is how their beautifully simple architecture looks like:
 
 ### Custom Learning Rate Schedule
 
+In the context of learning rate scheduling in the "Attention is All You Need" paper, two key observations are made. First, it's noted that as the number of embedding vector dimensions increases, the learning rate decreases. This reduction in the learning rate aligns with the intuition that a lower learning rate is necessary when adjusting a larger number of model parameters.
+
 
 <p align="left">
 <img src="data/readme_pics/lr_formula.PNG"/>
 </p>
 
-### Label Smoothing
+The second observation focuses on how the learning rate changes concerning the training step number (step_num) and the warmup steps (warmup_steps). It's observed that the learning rate follows a specific pattern: it linearly increases until reaching the warmup steps, after which it decreases due to the inverse square root of the step number. This dynamic behavior results in a learning rate that is lower when the number of embedding vector dimensions (dim_embed) is larger. The paper doesn't explicitly explain the reason behind this learning rate schedule, but it is suggested that the warmup period with a small initial learning rate helps stabilize training, and an empirical choice of warmup_steps=4000 is mentioned for the base transformer training.
 
-<p align="center">
-<img src="data/readme_pics/label_smoothing.PNG" width="700"/>
+<p align="left">
+<img src="data/readme_pics/learning-rate-schedule.png"/>
 </p>
+
+```python
+
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
+
+class Scheduler(_LRScheduler):
+    def __init__(self, 
+                 optimizer: Optimizer,
+                 dim_embed: int,
+                 warmup_steps: int,
+                 last_epoch: int=-1,
+                 verbose: bool=False) -> None:
+
+        self.dim_embed = dim_embed
+        self.warmup_steps = warmup_steps
+        self.num_param_groups = len(optimizer.param_groups)
+
+        super().__init__(optimizer, last_epoch, verbose)
+        
+    def get_lr(self) -> float:
+        lr = calc_lr(self._step_count, self.dim_embed, self.warmup_steps)
+        return [lr] * self.num_param_groups
+
+
+def calc_lr(step, dim_embed, warmup_steps):
+    return dim_embed**(-0.5) * min(step**(-0.5), step * warmup_steps**(-1.5))
+
+```
+
+## Greedy and Beam Search Decoding
+
+Greedy decoding is a method used in machine translation, particularly in the context of neural machine translation. In this process, the decoder generates a sequence of output words based on the highest probability at each step. It begins with the first word, selected as the one with the maximum probability from the list of possible output words. This chosen word becomes the input for the next step, and the process continues iteratively. The idea is to construct a translation by making locally optimal choices at each stage, selecting the most likely word to proceed.
+
+```python
+
+import torch
+from torch import Tensor
+
+# Create source and target vocab objects
+source_vocab = ...
+target_vocab = ...
+
+# Input sentence
+input_text = '....input language sentence...'
+
+# Tokenization
+input_tokens = source_vocab(input_text.strip())
+
+# A batch of one input for Encoder
+encoder_input = torch.Tensor([input_tokens])
+
+# Generate encoded features
+model.eval()
+with torch.no_grad():
+    encoder_output = model.encode(encoder_input)
+
+# Start decoding with SOS
+decoder_input = torch.Tensor([[SOS_IDX]]).long()
+
+# Maximum output size
+max_output_length = encoder_input.shape[-1] + 50 # give some extra length
+
+# Autoregressive
+for _ in range(max_output_length):
+    # Decoder prediction
+    logits = model.decode(encoder_output, decoder_input)
+
+    # Greedy selection
+    token_index = torch.argmax(logits[:, -1], keepdim=True)
+    
+    # EOS is most probable => Exit
+    if token_index.item()==EOS_IDX:
+        break
+
+    # Next Input to Decoder
+    decoder_input = torch.cat([decoder_input, token_index], dim=1)
+
+# Decoder input is a batch of one entry, 
+# and we also exclude SOS at the beginning.
+decoder_output = decoder_input[0, 1:].numpy()
+
+# Convert token indices to token texts
+output_texts = [target_vocab.tokens[i] for i in decoder_output]
+```
+
+However, the limitation of greedy decoding is that it may not always yield the best overall translation, especially for more complex sentences. This is because there can be multiple reasonable translation options, and the model's highest probability choice at each step might not lead to the most accurate or fluent translation. Greedy decoding simplifies the translation process by focusing on immediate probabilities but may not account for the global context of the entire sentence. Consequently, for more sophisticated and nuanced translations, alternative decoding methods, like beam search or sampling, are often preferred to explore a wider range of possibilities and improve the translation quality.
+
+### Beam search decoding
+
+Beam search decoding is a strategy to improve upon the limitations of both greedy and exhaustive search methods. It introduces a hyper-parameter, often denoted as β, which determines the number of paths or beams to retain while conducting the search. With a relatively small value of β, such as 2, the beam search will keep only the top two most probable sequences at each step.
+
+In beam search, as you progress through decoding, you retain a limited set of the most promising sequences, preventing the exponential growth of possibilities and addressing the dimensionality problem associated with exhaustive searches. This allows the search to strike a balance between the simplicity of the greedy approach (where β equals 1) and the thoroughness of an exhaustive search (where β is not limited). By controlling the value of β, you can fine-tune the trade-off between exploration and exploitation in the decoding process, ultimately leading to improved translation quality for machine translation tasks.
+
+```python
+
+import torch
+from torch import Tensor
+
+# Create source and target vocab objects
+source_vocab = ...
+target_vocab = ...
+
+# Beam size and penalty alpha
+beam_size = 3
+alpha = 0.6
+
+# Input sentence
+input_text = '....input language sentence...'
+
+# Tokenization
+input_tokens = source_vocab(input_text.strip())
+
+# A batch of one input for Encoder
+encoder_input = torch.Tensor([input_tokens])
+
+# Generate encoded features
+model.eval()
+with torch.no_grad():
+    encoder_output = model.encode(encoder_input)
+
+# Start with SOS
+decoder_input = torch.Tensor([[SOS_IDX]]).long()
+
+# Maximum output size
+max_output_length = encoder_input.shape[-1] + 50 # give some extra length
+
+scores = torch.Tensor([0.])
+vocab_size = len(target_vocab)
+
+for i in range(max_output_length):
+    # Decoder prediction
+    logits = model.decode(encoder_output, decoder_input)
+
+    # Softmax
+    log_probs = torch.log_softmax(logits[:, -1], dim=1)
+    log_probs = log_probs / sequence_length_penalty(i+1, alpha)
+
+    # Set score to zero where EOS has been reached
+    log_probs[decoder_input[:, -1]==EOS_IDX, :] = 0
+                                         
+    # scores [beam_size, 1], log_probs [beam_size, vocab_size]
+    scores = scores.unsqueeze(1) + log_probs
+
+    # Flatten scores from [beams, vocab_size] to [beams * vocab_size] to get top k, 
+    # and reconstruct beam indices and token indices
+    scores, indices = torch.topk(scores.reshape(-1), beam_size)
+    beam_indices  = torch.divide   (indices, vocab_size, rounding_mode='floor') # indices // vocab_size
+    token_indices = torch.remainder(indices, vocab_size)                        # indices %  vocab_size
+
+    # Build the next decoder input
+    next_decoder_input = []
+    for beam_index, token_index in zip(beam_indices, token_indices):
+        prev_decoder_input = decoder_input[beam_index]
+        if prev_decoder_input[-1]==EOS_IDX:
+            token_index = EOS_IDX # once EOS, always EOS
+        token_index = torch.LongTensor([token_index])
+        next_decoder_input.append(torch.cat([prev_decoder_input, token_index]))
+    decoder_input = torch.vstack(next_decoder_input)
+
+    # If all beams are finished, exit
+    if (decoder_input[:, -1]==EOS_IDX).sum() == beam_size:
+        break
+
+    # Encoder output expansion from the second time step to the beam size
+    if i==0:
+        encoder_output = encoder_output.expand(beam_size, *encoder_output.shape[1:])
+        
+# convert the top scored sequence to a list of text tokens
+decoder_output, _ = max(zip(decoder_input, scores), key=lambda x: x[1])
+decoder_output = decoder_output[1:].numpy() # remove SOS
+
+output_text_tokens = [target_vocab.tokens[i] for i in decoder_output if i != EOS_IDX] # remove EOS if exists
+
+```
 
 ## Machine translation
 
