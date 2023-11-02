@@ -376,9 +376,9 @@ And this one belongs to layer 5 of the self-attention decoder MHA (multi-head at
 
 
 <p align="center">
-<img src="data/readme_pics/attention-layer5.PNG" width="850"/>
+<img src="data/readme_pics/attention-layer5.png" width="850"/>
 </p>
->
+
 
 
 ## Todos:
