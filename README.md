@@ -1,6 +1,8 @@
 ## Implementation of the "Attention is all you Need" 📝 Transformer model Ⓜ️ (Vaswani et al.) in Tensorflow.
+
 This repo contains Tensorflow implementation of the original transformer paper (:link: [Vaswani et al.](https://arxiv.org/abs/1706.03762)). <br/>
-Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zaiinn440))
+
+Also Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zaiinn440))
 
 ## Table of Contents
   * [What are transformers?](#what-are-transformers)
@@ -357,33 +359,34 @@ models they'll **automatically get downloaded** the first time you run the trans
 
 ### Visualizing attention
 
-You can use the `translation_script.py` and set the `--visualize_attention` to True to additionally understand what your
-model was "paying attention to" in the source and target sentences.
+To truely understand what our model was "paying attention to" in the source and target sentences lets visualize the 
 
-Here are the attentions I get for the input sentence `Ich bin ein guter Mensch, denke ich.`
 
-These belong to layer 6 of the encoder. You can see all of the 8 multi-head attention heads.
+Here are the attentions I get for the input sentence `Zwei Frauen in pinkfarbenen T-Shirts und.`
 
-<p align="center">
-<img src="data/readme_pics/attention_enc_self.PNG" width="850"/>
-</p>
+These belong to layer 3 of the encoder. You can see all of the 8 multi-head attention heads.
 
-And this one belongs to decoder layer 6 of the self-attention decoder MHA (multi-head attention) module. <br/>
-You can notice an interesting **triangular pattern** which comes from the fact that target tokens can't look ahead!
 
 <p align="center">
-<img src="data/readme_pics/attention_dec_self.PNG" width="850"/>
+<img src="data/readme_pics/attention-layer3.png" width="850"/>
 </p>
 
-The 3rd type of MHA module is the source attending one and it looks similar to the plot you saw for the encoder. <br/>
+And this one belongs to layer 5 of the self-attention decoder MHA (multi-head attention) module. <br/>
+
+
+
+<p align="center">
+<img src="data/readme_pics/attention-layer5.PNG" width="850"/>
+</p>
+>
 
 
 ## Todos:
 
 Finally there are a couple more todos which I'll hopefully add really soon:
-* Explore how open source LLMs can be used to detect these scams.
-* Make a data pipeline with Kedro and MLflow.
-* Deploy the models and learn the effect of drift on their performance.
+* Integrate Flash Attention into this Transformer implementation for efficient computation.
+* Write a blog on Medium regarding the complete implementation of transformers.
+* Train this model across different languages for machine translation i.e. Urdu -> English and English -> Urdu.
 
 
 ## Acknowledgements
