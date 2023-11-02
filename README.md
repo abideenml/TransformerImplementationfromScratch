@@ -1,4 +1,4 @@
-## The Original Transformer (Tensorflow)
+## Implementation of the "Attention is all you Need" 📝 Transformer model Ⓜ️ (Vaswani et al.) in Tensorflow.
 This repo contains Tensorflow implementation of the original transformer paper (:link: [Vaswani et al.](https://arxiv.org/abs/1706.03762)). <br/>
 Check out my 10 part LLM Blog series on (:link: [Medium](https://medium.com/@zaiinn440))
 
