@@ -314,7 +314,7 @@ Let's get this thing running! Follow the next steps:
 1. `git clone https://github.com/abideenml/TransformerImplementationfromScratch`
 2. Navigate into project directory `cd path_to_repo`
 3. Create a new venv environment and run `pip install -r requirements.txt`
-4. 
+4. Run the `Transformer.ipynb` notebook.
 
 That's it!<br/>
 
@@ -359,7 +359,7 @@ models they'll **automatically get downloaded** the first time you run the trans
 
 ### Visualizing attention
 
-To truely understand what our model was "paying attention to" in the source and target sentences lets visualize the 
+To truely understand what our model was "paying attention to" in the source and target sentences lets visualize.
 
 
 Here are the attentions I get for the input sentence `Zwei Frauen in pinkfarbenen T-Shirts und.`
